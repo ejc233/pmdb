@@ -8,25 +8,72 @@
 
 #include <iostream>
 #include <pqxx/pqxx>
+#include "get.h"
+#include "json.hpp"
+#include <sstream>
 
+using json = nlohmann::json;
 using namespace std;
 using namespace pqxx;
 
-//int main() {
-//	cout << "Hello, World!" << endl;
-//	try {
-//		connection C(
-//				"dbname = pmdb user = postgres hostaddr = 127.0.0.1 port = 5432");
-//		if (C.is_open()) {
-//			cout << "Opened database successfully: " << C.dbname() << endl;
-//		} else {
-//			cout << "Can't open database" << endl;
-//			return 1;
-//		}
-//		C.disconnect();
-//	} catch (const std::exception &e) {
-//		cerr << e.what() << std::endl;
-//		return 1;
-//	}
-//	return 0;
-//}
+#include <sstream>
+
+template<typename T>
+string toString(T Number) {
+	std::ostringstream ss;
+	ss << Number;
+	return ss.str();
+}
+
+void populateGenres() {
+	string apikey = "06709af3621440ead23fb1f3e554ee3d";
+
+	// Get database response
+	string fullURL = "https://api.themoviedb.org/3/genre/movie/list?api_key="
+			+ apikey;
+
+	json genreJson = json::parse(get(fullURL));
+
+	try {
+		string sql;
+
+		connection C(
+				"dbname = pmdb user = postgres password = postgres hostaddr = 127.0.0.1 port = 5432");
+		if (C.is_open()) {
+			cout << "Opened database successfully: " << C.dbname() << endl;
+		} else {
+			cout << "Can't open database" << endl;
+		}
+
+		/* Create a transactional object. */
+		work W(C);
+
+		sql = string("DROP TABLE IF EXISTS genre");
+		W.exec(sql);
+
+		sql = string("CREATE TABLE genre(") + "id INT PRIMARY KEY NOT NULL,"
+				+ "name CHAR(15));";
+		W.exec(sql);
+
+		for (int i = 0; i < genreJson["genres"].size(); i++) {
+			string id = toString(genreJson["genres"][i]["id"]);
+			string name = genreJson["genres"][i]["name"];
+			sql = string("INSERT INTO genre (id, name) ") + "VALUES (" + id
+					+ ", '" + name + "'); ";
+			cout << sql << endl;
+			W.exec(sql);
+		}
+
+		W.commit();
+		cout << "Table created successfully" << endl;
+		C.disconnect();
+
+	} catch (const exception &e) {
+		cerr << e.what() << endl;
+	}
+}
+
+int main() {
+	populateGenres();
+	return 0;
+}
