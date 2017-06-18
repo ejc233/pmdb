@@ -12,13 +12,13 @@ Movie::Movie() {
 	watched = false;
 }
 
-Movie::Movie(string t, tm rd) {
+Movie::Movie(string t, string rd) {
 	title = t;
 	releasedate = rd;
 	watched = false;
 }
 
-Movie::Movie(string t, tm rd, bool w) {
+Movie::Movie(string t, string rd, bool w) {
 	title = t;
 	releasedate = rd;
 	watched = w;
@@ -28,7 +28,7 @@ Movie::Movie(string t, tm rd, bool w) {
 string Movie::getTitle() {
 	return title;
 }
-tm Movie::getReleaseDate() {
+string Movie::getReleaseDate() {
 	return releasedate;
 }
 bool Movie::wasWatched() {
@@ -39,7 +39,7 @@ bool Movie::wasWatched() {
 void Movie::setTitle(string t) {
 	title = t;
 }
-void Movie::setReleaseDate(tm rd) {
+void Movie::setReleaseDate(string rd) {
 	releasedate = rd;
 }
 void Movie::setWatched(bool w) {

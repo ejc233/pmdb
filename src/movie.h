@@ -11,24 +11,23 @@ using namespace std;
 class Movie{
 private:
 	string title;
-	tm releasedate;
+	string releasedate;
 	bool watched;
 
 public:
 	// constructors
 	Movie();
-	Movie(string, tm);
-	Movie(string, tm, bool);
+	Movie(string, string);
+	Movie(string, string, bool);
 
 	// accessor methods
 	string getTitle ();
-	tm getReleaseDate();
-	string getRating();
+	string getReleaseDate();
 	bool wasWatched();
 
 	// mutator methods
 	void setTitle(string);
-	void setReleaseDate(tm);
+	void setReleaseDate(string);
 	void setWatched(bool);
 };
 
