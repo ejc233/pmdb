@@ -110,26 +110,30 @@ void populateMovies() {
 		/* Create a transactional object. */
 		work W(C);
 
+		// sql = string("DROP TABLE IF EXISTS movie;");
+		// W.exec(sql);
+
 		sql = string("CREATE TABLE IF NOT EXISTS movie(")
 				+ "id INT PRIMARY KEY NOT NULL,"
-				+ "title CHAR(100), watched BOOL);";
+				+ "title CHAR(50), releasedate CHAR(10), watched BOOL);";
 		W.exec(sql);
 
+		string current = url + "list/28?api_key=" + apikey;
+		json winnerJson = json::parse(get(current));
+
 		// int latestId = latestJson["id"];
-		for (int i = 1; i <= 1000; i++) {
-			cout << i << endl;
-			string current = url + "movie/" + toString(i) + "?api_key="
-					+ apikey;
-			json currentJson = json::parse(get(current));
-			if (currentJson["status_code"] != 34) {
-				string id = toString(currentJson["id"]);
-				string title = escape(currentJson["title"]);
-				sql = string("INSERT INTO movie (id, title) ") + "VALUES (" + id
-						+ ", '" + title + "') ON CONFLICT DO NOTHING;";
-				W.exec(sql);
-				std::this_thread::sleep_for(std::chrono::milliseconds(250));
-			}
+		for (int i = 0; i < winnerJson["items"].size(); i++) {
+			string id = toString(winnerJson["items"][i]["id"]);
+			string title = escape(winnerJson["items"][i]["title"]);
+			string releasedate = escape(winnerJson["items"][i]["release_date"]);
+			sql = string("INSERT INTO movie (id, title, releasedate) ")
+					+ "VALUES (" + id + ", '" + title + "', '" + releasedate
+					+ "') ON CONFLICT DO NOTHING;";
+			W.exec(sql);
+			std::this_thread::sleep_for(std::chrono::milliseconds(250));
 		}
+		sql = string("DELETE FROM movie WHERE title = 'Finding Nemo';");
+		W.exec(sql);
 
 		W.commit();
 		cout << "Table created successfully" << endl;
