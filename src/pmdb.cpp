@@ -132,6 +132,7 @@ void populateMovies() {
 			W.exec(sql);
 			std::this_thread::sleep_for(std::chrono::milliseconds(250));
 		}
+		// provided list has erroneous title
 		sql = string("DELETE FROM movie WHERE title = 'Finding Nemo';");
 		W.exec(sql);
 
